@@ -10,7 +10,7 @@ file_extensions:
 
 first_line_match: |-
   (?xi:
-    ^ \#! .* \bosascript\b                        # shebang
+    ^ \#! .* \bosascript(?!\s+-l\s+JavaScript)\b  # shebang
   | ^ \s* \# .*? -\*- .*? \bosascript\b .*? -\*-  # editorconfig
   )
 
@@ -558,12 +558,12 @@ contexts:
     - match: '(\{)'
       comment: We cannot necessarily distinguish "records" from "arrays", and so this could be either.
       captures:
-        1: punctuation.section.array.applescript
+        1: punctuation.section.array.begin.applescript
       push:
         - meta_scope: meta.array.applescript
         - match: '(\})'
           captures:
-            1: punctuation.section.array.applescript
+            1: punctuation.section.array.end.applescript
           pop: true
         - match: '(\w+|((\|)[^|\n]*(\|)))\s*(:)'
           captures:

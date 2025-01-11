@@ -17,39 +17,58 @@ first_line_match: |-
   )
 
 contexts:
-  branch-possible-arrow-function:
-    - meta_prepend: true
 
-    - match: (?=<)
-      set: jsx-tag
-
-  jsx-tag-hack: []
-
-  jsx-tag-attributes-top:
-    - meta_scope: meta.tag.js
-    - match: '/'
+  ts-old-type-assertion:
+    # old type assertions are replaced by JSX tags
+    - match: <
       scope: punctuation.definition.tag.begin.js
       set:
-        - jsx-meta-unmatched-tag
-        - jsx-expect-tag-end
-        - jsx-tag-name
+        - jsx-meta
+        - jsx-tag-begin
 
+  jsx-tag: []  # replaced by `ts-old-type-assertion`
+
+  jsx-tag-begin:
+    - meta_include_prototype: false
+    - meta_scope: meta.tag.js
+    # note: type parameter modifiers indicate generic lambda
+    - match: (?=(?:in|out|const){{identifier_break}})
+      fail: arrow-function
+    - match: /
+      scope: punctuation.definition.tag.begin.js
+      set:
+        - jsx-expect-unmatched-tag-end
+        - jsx-tag-name
     - match: (?=\S)
       set:
         - jsx-tag-attributes
         - tsx-tag-check
         - jsx-tag-name
 
+  jsx-tag-name:
+    - meta_include_prototype: false
+    - match: ''
+      set:
+        - jsx-tag-name-meta
+        - tsx-tag-generic-arguments
+        - jsx-tag-name-end
+        - jsx-tag-name-component-possibly-native
+
+  tsx-tag-generic-arguments:
+    - include: ts-generic-type-arguments
+    - include: else-pop
+
   tsx-tag-check:
-    - match: 'extends{{jsx_identifier_break}}'
+    - match: extends{{jsx_identifier_break}}
       scope: entity.other.attribute-name.js
       set:
-        - match: (?=>)
-          pop: true
+        - meta_include_prototype: false
+        - match: (?=[>=])
+          pop: 1
         - match: (?=\S)
           fail: arrow-function
 
     - match: (?=[/>{]|{{identifier_start}})
-      pop: true
+      pop: 1
     - match: (?=\S)
       fail: arrow-function

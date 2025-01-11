@@ -49,7 +49,7 @@ classdef (Sealed = verLessThan('matlab', '8.4'), ~Hidden) ClassName < SuperClass
 %                                 ^ punctuation.separator.sequence.matlab
 %                                   ^^^^^^^^^ variable.parameter.attribute.matlab
 %                                             ^ keyword.operator.assignment.matlab
-%                                               ^^^^ constant.language.matlab
+%                                               ^^^^ constant.language.boolean.true.matlab
 %                                                   ^ punctuation.section.parens.end.matlab
 %                                                      ^^^^^^^^^^ comment.line.percentage.matlab
       PropName
@@ -65,7 +65,7 @@ classdef (Sealed = verLessThan('matlab', '8.4'), ~Hidden) ClassName < SuperClass
 %           ^^^^^^ variable.parameter.attribute.matlab
 %                 ^ punctuation.section.parens.end.matlab
 %                    ^^^^^^^^^^ comment.line.percentage.matlab
-      function funcionName(obj)
+      function functionName(obj)
          functionName@SuperClass1(obj)
 %                    ^ punctuation.accessor.at.matlab - keyword.operator
       end
@@ -113,6 +113,15 @@ classdef ClassName ... comment
    < SuperClass
 %  ^ meta.class.matlab punctuation.separator.inheritance.matlab
 %    ^^^^^^^^^^ meta.class.matlab entity.other.inherited-class.matlab
+end
+
+classdef MyClass < matlab.mixin.Copyable
+%                  ^^^^^^^^^^^^^^^^^^^^^ meta.path.matlab - meta.path meta.path
+%                  ^^^^^^ variable.namespace.matlab
+%                        ^ punctuation.accessor.dot.matlab
+%                         ^^^^^ variable.namespace.matlab
+%                              ^ punctuation.accessor.dot.matlab
+%                               ^^^^^^^^ entity.other.inherited-class.matlab
 end
 
 
@@ -171,7 +180,9 @@ xAprox = fMetodoDeNewton( xi )
 %% comment % comment
 %<- comment.line.double-percentage.matlab punctuation.definition.comment.matlab
 %^ comment.line.double-percentage.matlab punctuation.definition.comment.matlab
-% ^^^^^^^^^^^^^^^^^^^ comment.line.double-percentage.matlab - punctuation
+% ^ comment.line.double-percentage.matlab - punctuation - entity
+%  ^^^^^^^^^^^^^^^^^ comment.line.double-percentage.matlab entity.name.section.matlab
+%                   ^ comment.line.double-percentage.matlab - entity
 
 %%%
 %<- comment.line.percentage.matlab punctuation.definition.comment.matlab
@@ -188,8 +199,8 @@ a = b % doc
 %      ^^^^^ comment.line.percentage.matlab - punctuation
 
 a = b %% doc
-%     ^^ comment.line.double-percentage.matlab punctuation.definition.comment.matlab
-%       ^^^^^ comment.line.double-percentage.matlab - punctuation
+%     ^^ comment.line.percentage.matlab punctuation.definition.comment.matlab
+%       ^^^^^ comment.line.percentage.matlab - punctuation - entity
 
 
 %---------------------------------------------
@@ -268,7 +279,7 @@ end
 %^^ meta.function.matlab keyword.declaration.function.end.matlab
 %  ^ - meta.function
 
-function [one, two, three] = myFunction(x)  % funtion with more than one output
+function [one, two, three] = myFunction(x)  % function with more than one output
 %^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ meta.function.matlab
 %                                      ^^^ meta.function.parameters.matlab - meta.function meta.function
 %^^^^^^^ keyword.declaration.function.matlab
@@ -471,8 +482,8 @@ end
 % Built-in constants
 
   true; false
-% ^^^^ constant.language.matlab
-%       ^^^^^ constant.language.matlab
+% ^^^^ constant.language.boolean.true.matlab
+%       ^^^^^ constant.language.boolean.false.matlab
   Inf; NaN
 % ^^^ constant.language.matlab
 %      ^^^ constant.language.matlab
@@ -782,10 +793,10 @@ l = {l.n}';
    "string with missing closing quote mark
 %                                         ^ invalid.illegal.unclosed-string.matlab
    true'
-%  ^^^^ constant.language.matlab
+%  ^^^^ constant.language.boolean.true.matlab
 %      ^ keyword.operator.transpose.matlab
    true.'
-%  ^^^^ constant.language.matlab
+%  ^^^^ constant.language.boolean.true.matlab
 %      ^^ keyword.operator.transpose.matlab
 
 % If a built-in function is followed by a transpose operator, we assume that the
@@ -870,10 +881,12 @@ fprintf(fileID,'%6.2f %12.8f\r\n',A);
    switch plottype
 %  ^^^^^^ meta.block.switch.matlab keyword.control.conditional.switch.matlab
       case 'bar'
+%^^^^^^^^^^^^^^^ meta.disable-dedentation.matlab
 %     ^^^^ meta.block.switch.matlab keyword.control.conditional.case.matlab
          bar(x)
          title('Bar Graph')
       case {'pie', 'pie3'}
+%^^^^^^^^^^^^^^^^^^^^^^^^^ - meta.disable-dedentation.matlab
 %     ^^^^ meta.block.switch.matlab keyword.control.conditional.case.matlab
          pie3(x)
          title('Pie Chart')
@@ -1027,3 +1040,12 @@ X = inf(n)
 
 X = nan(n)
 %   ^^^ support.function.builtin.matlab
+
+
+%---------------------------------------------
+% Pop function context if another function appears at the start of a line
+
+function myFunction(x)
+
+function notNestedFunction(x)
+%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ meta.function - meta.function meta.function
