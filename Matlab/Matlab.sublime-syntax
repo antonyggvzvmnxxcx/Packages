@@ -438,12 +438,22 @@ contexts:
     - include: variables
     - include: invalid-variables
 
+  expect-expression:
+    - match: (?=\s*[;,])
+      pop: 1
+    - include: eol-pop
+    - include: expressions
+
   eol-pop:
     - match: '{{eol}}'
       pop: 1
 
   else-pop:
     - match: (?=\S)
+      pop: 1
+
+  immediately-pop:
+    - match: ''
       pop: 1
 
 ###[ COMMENTS AND LINE CONTINUATION ]###########################################
@@ -467,10 +477,11 @@ contexts:
     - include: block-comments
 
   line-comments:
-    - match: (%%(?!%)).*\n?
+    - match: ^\s*(%%(?!%))\s*(.*\S)?\s*\n?
       scope: comment.line.double-percentage.matlab
       captures:
         1: punctuation.definition.comment.matlab
+        2: entity.name.section.matlab
     - match: (%+).*\n?
       scope: comment.line.percentage.matlab
       captures:
@@ -738,6 +749,10 @@ contexts:
     - match: \bend\b
       scope: keyword.declaration.function.end.matlab
       pop: 1
+    # Heuristic to pop context when another `function` keyword appears directly at the start of a line, which is
+    # unlikely to indicate a nested function (the `end` keyword is sometimes optional).
+    - match: ^(?=function\b)
+      pop: 1
     - include: function-declarations
     - include: keywords
     - include: expressions
@@ -771,10 +786,23 @@ contexts:
     - include: line-continuations
     - match: '{{eol}}'
       set: class-body
+    - match: (?={{identifier}}\.)
+      push: qualified-superclass
     - match: '{{identifier}}'
       scope: entity.other.inherited-class.matlab
     - match: \&
       scope: punctuation.separator.sequence.matlab
+
+  qualified-superclass:
+    - meta_scope: meta.path.matlab
+    - match: '({{identifier}})(\.)'
+      captures:
+        1: variable.namespace.matlab
+        2: punctuation.accessor.dot.matlab
+    - match: '{{identifier}}'
+      scope: entity.other.inherited-class.matlab
+      pop: 1
+    - include: immediately-pop
 
   class-attributes-list:
     - meta_scope: meta.attributes.matlab
@@ -959,7 +987,26 @@ contexts:
   switch-blocks:
     - match: \bswitch\b
       scope: keyword.control.conditional.switch.matlab
-      push: switch-block-content
+      push:
+        - switch-block-content
+        - expect-first-case-statement
+        - expect-expression
+
+  expect-first-case-statement:
+    # Disable dedentation of first case statement by special indentation rule.
+    - match: ^\s*(case)\b
+      captures:
+        1: keyword.control.conditional.case.matlab
+      set:
+        - meta-disable-dedentation
+        - expect-expression
+    - include: comments
+    - include: else-pop
+
+  meta-disable-dedentation:
+    - meta_include_prototype: false
+    - meta_scope: meta.disable-dedentation.matlab
+    - include: immediately-pop
 
   switch-block-content:
     - meta_scope: meta.block.switch.matlab
@@ -1121,7 +1168,13 @@ contexts:
 
   # Functions that return essential constants, usually used without parameters
   builtin-constants:
-    - match: \b(true|false|eps|pi|Inf|NaN|NaT|flintmax|intmax|intmin|realmax|realmin|namelengthmax)\b
+    - match: \bfalse\b
+      scope: constant.language.boolean.false.matlab
+      push: maybe-transpose
+    - match: \btrue\b
+      scope: constant.language.boolean.true.matlab
+      push: maybe-transpose
+    - match: \b(eps|pi|Inf|NaN|NaT|flintmax|intmax|intmin|realmax|realmin|namelengthmax)\b
       scope: constant.language.matlab
       push: maybe-transpose
 

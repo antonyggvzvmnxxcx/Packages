@@ -125,6 +125,15 @@ let x : T.U<V>;
 //         ^^^ meta.generic
 //          ^ support.class
 
+let x : T.U
+//      ^^^ meta.type
+//      ^ support.class
+//       ^ punctuation.accessor
+//        ^ support.class
+
+<V />;
+// <- meta.jsx - meta.type
+
 // This is invalid TSX as the TypeScript type assertion is parsed as a JSX tag
 let strLength: number = (<string>someValue).length; // </string> );
 //                       ^^^^^^^^ meta.tag - meta.assertion
@@ -203,15 +212,154 @@ if (a < b || c <= d) {}
 //     ^^^^^^^ meta.tag.attributes entity.other.attribute-name
 //            ^ punctuation.definition.tag.end
 
-    <T extends {}>() => {}; // </T>;
-//  ^^^^^^^^^^^^^^^^^^^^^^ meta.function
-//  ^^^^^^^^^^^^^^ meta.function meta.generic
+    <T extends "s">() => {x}; // </T>;
+//  ^^^^^^^^^^^^^^^^^^^^^^^^ meta.function
+//  ^^^^^^^^^^^^^^^ meta.function meta.generic
 //   ^ variable.parameter.generic
 //     ^^^^^^^ storage.modifier.extends
-//             ^^ meta.function meta.generic meta.mapping
+//             ^^^ meta.function meta.generic
+
+    <T extends="s">() => {x}; // </T>;
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ meta.jsx
+//  ^^^^^^^^^^^^^^^ meta.tag
+//   ^ meta.tag.name entity.name.tag
+//     ^^^^^^^ entity.other.attribute-name
+//            ^ punctuation.separator.key-value
+//             ^^^ string.quoted.double
+//                 ^^^^^^^^^ - meta.function
+//                       ^^^ meta.interpolation
+//                               ^^^^ meta.tag
+//                                 ^ meta.tag.name entity.name.tag
+//                                   ^ punctuation.terminator.statement
+
+    <const T>() => {}; // </T>;
+//  ^^^^^^^^^ meta.function meta.generic - meta.function meta.function
+//           ^^ meta.function.parameters - meta.function meta.function
+//             ^^^^^^ meta.function - meta.function meta.function
+//  ^ punctuation.definition.generic.begin
+//   ^^^^^ storage.modifier.const
+//         ^ variable.parameter.generic
+//          ^ punctuation.definition.generic.end
+//           ^ punctuation.section.group.begin
+//            ^ punctuation.section.group.end
+//              ^^ keyword.declaration.function.arrow
+//                 ^^ meta.block
+//                 ^ punctuation.section.block.begin
+//                  ^ punctuation.section.block.end
+//                   ^ punctuation.terminator.statement
+//                     ^^^^^^^^ comment.line.double-slash
+//                     ^^ punctuation.definition.comment
+
+    <const T extends>() => {}; // </T>;
+//  ^^^^^^^^^^^^^^^^^ meta.function meta.generic - meta.function meta.function
+//                   ^^ meta.function.parameters - meta.function meta.function
+//                     ^^^^^^ meta.function - meta.function meta.function
+//  ^ punctuation.definition.generic.begin
+//   ^^^^^ storage.modifier.const
+//         ^ variable.parameter.generic
+//           ^^^^^^^ storage.modifier.extends
+//                  ^ punctuation.definition.generic.end
+//                   ^ punctuation.section.group.begin
+//                    ^ punctuation.section.group.end
+//                      ^^ keyword.declaration.function.arrow
+//                         ^^ meta.block
+//                         ^ punctuation.section.block.begin
+//                          ^ punctuation.section.block.end
+//                           ^ punctuation.terminator.statement
+//                             ^^^^^^^^ comment.line.double-slash
+//                             ^^ punctuation.definition.comment
+
+    <const T extends "s">() => {x}; // </T>;
+//  ^^^^^^^^^^^^^^^^^^^^^ meta.function meta.generic - meta.function meta.function
+//                       ^^ meta.function.parameters - meta.function meta.function
+//                         ^^^^^^^ meta.function - meta.function meta.function
+//  ^ punctuation.definition.generic.begin
+//   ^^^^^ storage.modifier.const
+//         ^ variable.parameter.generic
+//           ^^^^^^^ storage.modifier.extends
+//                   ^^^ meta.string string.quoted.double
+//                      ^ punctuation.definition.generic.end
+//                       ^ punctuation.section.group.begin
+//                        ^ punctuation.section.group.end
+//                          ^^ keyword.declaration.function.arrow
+//                             ^^^ meta.block
+//                             ^ punctuation.section.block.begin
+//                               ^ punctuation.section.block.end
+//                                ^ punctuation.terminator.statement
+//                                  ^^^^^^^^ comment.line.double-slash
+//                                  ^^ punctuation.definition.comment
+
+    <const T extends="s">() => {x}; // </T>;
+//  ^^^^^^^^^^^^^^^^^^^^^ meta.function meta.generic - meta.function meta.function
+//                       ^^ meta.function.parameters - meta.function meta.function
+//                         ^^^^^^ meta.function - meta.function meta.function
+//  ^ punctuation.definition.generic.begin
+//   ^^^^^ storage.modifier.const
+//         ^ variable.parameter.generic
+//           ^^^^^^^ storage.modifier.extends
+//                  ^ keyword.operator.assignment.js
+//                   ^^^ meta.string string.quoted.double
+//                      ^ punctuation.definition.generic.end
+//                       ^ punctuation.section.group.begin
+//                        ^ punctuation.section.group.end
+//                          ^^ keyword.declaration.function.arrow
+//                             ^^^ meta.block
+//                             ^ punctuation.section.block.begin
+//                               ^ punctuation.section.block.end
+//                                ^ punctuation.terminator.statement
+//                                  ^^^^^^^^ comment.line.double-slash
+//                                  ^^ punctuation.definition.comment
 
     <T {...}>() => {};</T>;
 //  ^^^^^^^^^^^^^^^^^^^^^^ meta.jsx
 //  ^^^^^^^^^ meta.tag
 //   ^ meta.tag.name entity.name.tag
 //     ^^^^^ meta.tag.attributes meta.interpolation
+
+    <C<T> a="foo" />;
+//  ^^^^^^^^^^^^^^^^ meta.jsx
+//  ^ meta.tag punctuation.definition.tag.begin
+//   ^^^^^ meta.tag.name
+//   ^ entity.name.tag
+//    ^^^ meta.generic
+//    ^ punctuation.definition.generic.begin
+//     ^ support.class
+//      ^ punctuation.definition.generic.end
+//        ^^^^^^^^ meta.tag.attributes
+//        ^ entity.other.attribute-name
+//         ^ punctuation.separator.key-value
+//          ^^^^^ string.quoted.double
+//          ^ punctuation.definition.string.begin
+//              ^ punctuation.definition.string.end
+//                ^^ - meta.tag.attributes
+//                ^ punctuation.definition.tag.end
+//                 ^ meta.tag punctuation.definition.tag.end
+//                  ^ punctuation.terminator.statement
+
+    true ? (a) : <foo />;
+//  ^^^^ constant.language.boolean.true
+//       ^ keyword.operator.ternary
+//         ^^^ meta.group
+//             ^ keyword.operator.ternary
+//               ^^^^^^^ meta.jsx meta.tag
+//               ^ punctuation.definition.tag.begin
+//                ^^^ meta.tag.name entity.name.tag
+//                    ^^ punctuation.definition.tag.end
+//                      ^ punctuation.terminator.statement
+
+    true ? (a) : <T foo="a">() => {} => {} : null; // </T>;
+//  ^^^^ constant.language.boolean.true
+//       ^ keyword.operator.ternary
+//         ^^^ meta.group
+//          ^ variable.other.readwrite
+//             ^ keyword.operator.ternary
+//               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ meta.jsx
+//                ^ meta.tag.name entity.name.tag
+//                  ^^^ entity.other.attribute-name
+//                     ^ punctuation.separator.key-value
+//                      ^^^ string.quoted.double
+//                                ^^ meta.interpolation
+//                                      ^^ meta.interpolation
+//                                                    ^^^^ meta.tag
+//                                                      ^ meta.tag.name entity.name.tag
+//                                                        ^ punctuation.terminator.statement

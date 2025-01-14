@@ -1,11 +1,17 @@
 /// SYNTAX TEST "Packages/C#/C#.sublime-syntax"
 
 class Foo {
-/// <- meta.class storage.type.class
+/// <- meta.class keyword.declaration.class
  /// <- meta.class
   /// <- meta.class
 ///^^^^^^^^ meta.class
 ///       ^ meta.class.body
+
+    public readonly double value;
+/// ^^^^^^ storage.modifier.access
+///        ^^^^^^^^ storage.modifier
+///                 ^^^^^^ storage.type
+///                        ^^^^^ variable.other.member
 
     void Main(string[] args) {
 /// ^^^^ storage.type
@@ -424,7 +430,7 @@ class Foo {
 ///      ^^^^^^ storage.type
 ///             ^^^^ variable.other
 ///                 ^ punctuation.separator.sequence
-///                   ^ variable.language.deconstruction.discard
+///                   ^ variable.language.anonymous
 ///                    ^ punctuation.separator.sequence
 ///                      ^^^^^^ storage.type
 ///                             ^^^^ variable.other
@@ -436,7 +442,7 @@ class Foo {
 ///          ^ punctuation.separator.sequence
 ///            ^^^^^^^^^^ variable.other
 ///                      ^ punctuation.separator.sequence
-///                        ^ variable.language.deconstruction
+///                        ^ variable.language.anonymous
 ///                         ^ punctuation.section.sequence.end
 ///                           ^ keyword.operator.assignment
         var (_, _, _, pop1, _, pop2) = QueryCityDataForYears("New York City", 1960, 2010);
@@ -640,7 +646,7 @@ class Foo {
 public readonly struct S
 /// ^^ storage.modifier.access
 ///    ^^^^^^^^ storage.modifier
-///             ^^^^^^ storage.type.struct
+///             ^^^^^^ keyword.declaration.struct
 ///                    ^ entity.name.struct
 {
 /// <- meta.struct.body meta.block punctuation.section.block.begin
@@ -668,6 +674,14 @@ public readonly struct S
         this = other;
     }
 }
+
+public readonly partial struct MyStruct
+/// ^^ storage.modifier.access
+///    ^^^^^^^^ storage.modifier
+///             ^^^^^^^ storage.modifier
+///                     ^^^^^^ keyword.declaration.struct
+///                            ^^^^^^^^ entity.name.struct
+{}
 
 // "private protected" is now a valid modifier. It's equivalent to protected, except that it can only be
 // accessed inside the current assembly.
@@ -713,11 +727,11 @@ Assert.Equal(43, bytes[1]);
 bytes[2] = 44; // throws IndexOutOfRangeException
 
 public readonly ref struct Span<T>
-///    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ meta.struct
+///             ^^^^^^^^^^^^^^^^^^^ meta.struct
 ///  ^ storage.modifier.access
 ///    ^^^^^^^^ storage.modifier
 ///             ^^^ storage.modifier
-///                 ^^^^^^ storage.type.struct
+///                 ^^^^^^ keyword.declaration.struct
 ///                        ^^^^ entity.name.struct
 {
     private readonly ref T _pointer;
@@ -729,7 +743,7 @@ public readonly ref struct Span<T>
     private readonly int _length;
 }
 
-public delegate void SpanAction<T, in TArg>(Span<T> span, TArg arg);
+public delegate void SpanAction<T, in TArg>(Span<T> span, TArg arg) ;
 ///    ^^^^^^^^ storage.type.delegate
 ///             ^^^^ storage.type
 ///                  ^^^^^^^^^^ variable.other.member.delegate
@@ -738,6 +752,7 @@ public delegate void SpanAction<T, in TArg>(Span<T> span, TArg arg);
 ///                              ^ punctuation.separator.type
 ///                                ^^ storage.modifier
 ///                                   ^^^^ support.type
+///                                                                 ^ punctuation.terminator.statement.cs
 
 void Test ()
 {
